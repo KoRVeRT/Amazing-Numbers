@@ -1,0 +1,384 @@
+package numbers;
+
+import java.text.NumberFormat;
+import java.util.*;
+
+public class Main {
+    static NumberFormat format = NumberFormat.getInstance(Locale.US);
+    static Scanner scanner = new Scanner(System.in);
+    static StringBuilder result;
+    static boolean buzz;
+    static boolean even;
+    static boolean odd;
+    static int checkDuck;
+    static boolean duck;
+    static boolean palindromic;
+    static boolean gapful;
+    static boolean spy;
+    static boolean square;
+    static boolean sunny;
+    static boolean jumping;
+    static boolean happy;
+    static boolean sad;
+
+    public static void main(String[] args) {
+        hello();
+        enterNumber();
+    }
+
+    public static void hello() {
+        System.out.println("Welcome to Amazing Numbers!\n" +
+                "\n" +
+                "Supported requests:\n" +
+                "- enter a natural number to know its properties;\n" +
+                "- enter two natural numbers to obtain the properties of the list:\n" +
+                "  * the first parameter represents a starting number;\n" +
+                "  * the second parameter shows how many consecutive numbers are to be processed;\n" +
+                "- two natural numbers and two properties to search for;\n" +
+                "- a property preceded by minus must not be present in numbers;\n" +
+                "- separate the parameters with one space;\n" +
+                "- enter 0 to exit.\n");
+    }
+
+    public static void enterNumber() {
+        while (true) {
+            System.out.println("Enter a request:");
+            String[] number = scanner.nextLine().split("\\s+");
+            try {
+                if (Long.parseLong(number[0]) <= -1) {
+                    System.out.println("The first parameter should be a natural number or zero.\n");
+                    continue;
+                } else if (Long.parseLong(number[0]) == 0) {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("The first parameter should be a natural number or zero.\n");
+                continue;
+            }
+            if (number.length == 1) {
+                printOne(number[0]);
+            }
+            if (number.length == 2) {
+                if (Long.parseLong(number[1]) <= 0) {
+                    System.out.println("The second parameter should be a natural number.\n");
+                    continue;
+                } else {
+                    printTwo(number[0], number[1]);
+                    System.out.println();
+                }
+            }
+            if (number.length > 2) {
+                String[] parameters = new String[number.length - 2];
+                for (int i = 2; i < number.length; i++) {
+                    for (int j = i - 2; j < parameters.length; j++) {
+                        parameters[j] = number[i];
+                    }
+                }
+                if (checkProperty(parameters)) {
+                    printThree(number[0], number[1], parameters);
+                    System.out.println();
+                }
+            }
+        }
+        System.out.println("Goodbye!");
+    }
+
+    public static Boolean checkProperty(String[] parameters) {
+        String avail = "BUZZ DUCK PALINDROMIC GAPFUL SPY SQUARE SUNNY EVEN ODD JUMPING HAPPY SAD " +
+                "-BUZZ -DUCK -PALINDROMIC -GAPFUL -SPY -SQUARE -SUNNY -EVEN -ODD -JUMPING -HAPPY -SAD";
+        boolean check = true;
+        ArrayList<String> accountExcl = new ArrayList<>();
+        ArrayList<String> properties = new ArrayList<>();
+        for (String parameter : parameters) {
+            String sBig = parameter.toUpperCase(Locale.ROOT);
+            if (!avail.contains(sBig)) {
+                properties.add(sBig);
+            } else {
+                accountExcl.add(sBig);
+            }
+        }
+        if (properties.size() > 1) {
+            System.out.println("The properties " + properties + " are wrong.\n" +
+                    "Available properties: [EVEN, ODD, BUZZ, DUCK, PALINDROMIC, GAPFUL, SPY, SQUARE, SUNNY, JUMPING, HAPPY, SAD]\n");
+            check = false;
+        } else if (properties.size() == 1) {
+            System.out.println("The property " + properties + " is wrong.\n" +
+                    "Available properties: [EVEN, ODD, BUZZ, DUCK, PALINDROMIC, GAPFUL, SPY, SQUARE, SUNNY, JUMPING, HAPPY, SAD]\n");
+            check = false;
+        } else if (accountExcl.size() > 1) {
+            if (accountExcl.contains("EVEN") && accountExcl.contains("ODD")) {
+                System.out.println("The request contains mutually exclusive properties: [EVEN, ODD]\n" +
+                        "There are no numbers with these properties.\n");
+                check = false;
+            } else if (accountExcl.contains("-EVEN") && accountExcl.contains("-ODD")) {
+                System.out.println("The request contains mutually exclusive properties: [-EVEN, -ODD]\n" +
+                        "There are no numbers with these properties.\n");
+                check = false;
+            } else if (accountExcl.contains("-EVEN") && accountExcl.contains("-EVEN")) {
+                System.out.println("The request contains mutually exclusive properties: [-EVEN, -EVEN]\n" +
+                        "There are no numbers with these properties.\n");
+                check = false;
+            } else if (accountExcl.contains("-ODD") && accountExcl.contains("-ODD")) {
+                System.out.println("The request contains mutually exclusive properties: [-ODD, -ODD]\n" +
+                        "There are no numbers with these properties.\n");
+                check = false;
+            } else if (accountExcl.contains("HAPPY") && accountExcl.contains("SAD")) {
+                System.out.println("The request contains mutually exclusive properties: [HAPPY, SAD]\n" +
+                        "There are no numbers with these properties.\n");
+                check = false;
+            } else if (accountExcl.contains("-HAPPY") && accountExcl.contains("-SAD")) {
+                System.out.println("The request contains mutually exclusive properties: [-HAPPY, -SAD]\n" +
+                        "There are no numbers with these properties.\n");
+                check = false;
+            } else if (accountExcl.contains("HAPPY") && accountExcl.contains("-HAPPY")) {
+                System.out.println("The request contains mutually exclusive properties: [HAPPY, -HAPPY]\n" +
+                        "There are no numbers with these properties.\n");
+                check = false;
+            } else if (accountExcl.contains("SAD") && accountExcl.contains("-SAD")) {
+                System.out.println("The request contains mutually exclusive properties: [SAD, -SAD]\n" +
+                        "There are no numbers with these properties.\n");
+                check = false;
+            } else if (accountExcl.contains("DUCK") && accountExcl.contains("-DUCK")) {
+                System.out.println("The request contains mutually exclusive properties: [DUCK, -DUCK]\n" +
+                        "There are no numbers with these properties.\n");
+                check = false;
+            } else if (accountExcl.contains("DUCK") && accountExcl.contains("SPY")) {
+                System.out.println("The request contains mutually exclusive properties: [DUCK, SPY]\n" +
+                        "There are no numbers with these properties.\n");
+                check = false;
+            } else if (accountExcl.contains("SPY") && accountExcl.contains("-SPY")) {
+                System.out.println("The request contains mutually exclusive properties: [SPY, -SPY]\n" +
+                        "There are no numbers with these properties.\n");
+                check = false;
+            } else if (accountExcl.contains("SUNNY") && accountExcl.contains("SQUARE")) {
+                System.out.println("The request contains mutually exclusive properties: [SUNNY, SQUARE]\n" +
+                        "There are no numbers with these properties.\n");
+                check = false;
+            } else if (accountExcl.contains("SUNNY") && accountExcl.contains("-SUNNY")) {
+                System.out.println("The request contains mutually exclusive properties: [SUNNY, -SUNNY]\n" +
+                        "There are no numbers with these properties.\n");
+                check = false;
+            } else if (accountExcl.contains("SQUARE") && accountExcl.contains("-SQUARE")) {
+                System.out.println("The request contains mutually exclusive properties: [SQUARE, -SQUARE]\n" +
+                        "There are no numbers with these properties.\n");
+                check = false;
+            }
+        }
+        return check;
+    }
+
+    public static void printOne(String num1) {
+        long number = Long.parseLong(num1);
+        info(number);
+        System.out.printf("Properties of %s\n" +
+                "        buzz: %b\n" +
+                "        duck: %b\n" +
+                " palindromic: %b\n" +
+                "      gapful: %b\n" +
+                "         spy: %b\n" +
+                "      square: %b\n" +
+                "       sunny: %b\n" +
+                "     jumping: %b\n" +
+                "       happy: %b\n" +
+                "         sad: %b\n" +
+                "        even: %b\n" +
+                "         odd: %b\n", format.format(number), buzz, duck, palindromic, gapful, spy, square, sunny, jumping, happy, sad, even, odd);
+    }
+
+    public static StringBuilder printTwo(String num1, String num2) {
+        long number = Long.parseLong(num1);
+        int quaint = Integer.parseInt(num2);
+        if (num2.equalsIgnoreCase("0")) {
+            quaint = 1;
+        }
+        info(number);
+        for (long i = 0; i < quaint; i++) {
+            info(number);
+            number++;
+            if (buzz) {
+                result.append("buzz, ");
+            }
+            if (duck) {
+                result.append("duck, ");
+            }
+            if (palindromic) {
+                result.append("palindromic, ");
+            }
+            if (gapful) {
+                result.append("gapful, ");
+            }
+            if (spy) {
+                result.append("spy, ");
+            }
+            if (square) {
+                result.append("square, ");
+            }
+            if (sunny) {
+                result.append("sunny, ");
+            }
+            if (jumping) {
+                result.append("jumping, ");
+            }
+            if (happy) {
+                result.append("happy, ");
+            }
+            if (sad) {
+                result.append("sad, ");
+            }
+            if (even) {
+                result.append("even");
+            } else {
+                result.append("odd");
+            }
+            if (!num2.equalsIgnoreCase("0")) {
+                System.out.println(result);
+            }
+        }
+        return result;
+    }
+
+    public static void printThree(String num1, String num2, String[] parameters) {
+        long counter = 0;
+        long number = Long.parseLong(num1);
+        do {
+            printTwo(String.valueOf(number), "0");
+            boolean checkPrint = true;
+            for (String parameter : parameters) {
+                if (parameter.startsWith("-")) {
+                    if (result.toString().contains(parameter.substring(1).toLowerCase(Locale.ROOT))) {
+                        checkPrint = false;
+                        break;
+                    }
+                } else {
+                    if (!result.toString().contains(parameter.toLowerCase(Locale.ROOT))) {
+                        checkPrint = false;
+                        break;
+                    }
+                }
+            }
+            if (checkPrint) {
+                System.out.println(result);
+                counter++;
+            }
+            number++;
+        }
+        while (counter != Long.parseLong(num2));
+    }
+
+    public static void info(long number) {
+        result = new StringBuilder(format.format(number) + " is ");
+        buzz = number % 7 == 0 || number % 10 == 7;
+        even = number % 2 == 0;
+        odd = !even;
+        checkDuck = String.valueOf(number).indexOf("0", 1);
+        duck = checkDuck > -1;
+        palindromic = palindromic(String.valueOf(number));
+        gapful = gapful(String.valueOf(number));
+        spy = spy(String.valueOf(number));
+        square = square(String.valueOf(number));
+        sunny = sunny(String.valueOf(number));
+        jumping = jumping(String.valueOf(number));
+        happy = happy(String.valueOf(number));
+        sad = !happy;
+    }
+
+    public static boolean palindromic(String num) {
+        boolean check = true;
+        char[] arr = num.toCharArray();
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] != arr[arr.length - i - 1]) {
+                check = false;
+                break;
+            }
+        }
+        return check;
+    }
+
+    public static boolean gapful(String num) {
+        boolean check = true;
+        long number = Long.parseLong(num);
+        String temp = num.charAt(0) + "" + num.charAt(num.length() - 1);
+        if (num.length() < 3) {
+            check = false;
+        } else {
+            int divider = Integer.parseInt(temp);
+            if (number % divider != 0) {
+                check = false;
+            }
+        }
+        return check;
+    }
+
+    public static boolean spy(String num) {
+        boolean check = true;
+        long sum = 0;
+        long product = 1;
+        char[] arr = num.toCharArray();
+        for (char c : arr) {
+            sum += Long.parseLong(String.valueOf(c));
+            product *= Long.parseLong(String.valueOf(c));
+        }
+        if (sum != product) {
+            check = false;
+        }
+        return check;
+    }
+
+    public static boolean square(String num) {
+        boolean check = true;
+        long number = Long.parseLong(num);
+        double result = Math.sqrt(number);
+        if (result != (long) result) {
+            check = false;
+        }
+        return check;
+    }
+
+    public static boolean sunny(String num) {
+        boolean check = true;
+        long number = Long.parseLong(num);
+        number++;
+        if (!square(String.valueOf(number))) {
+            check = false;
+        }
+        return check;
+    }
+
+    public static boolean jumping(String num) {
+        boolean check = true;
+        char[] arr = num.toCharArray();
+        int temp = Integer.parseInt(String.valueOf(arr[0]));
+        for (int i = 1; i < arr.length; i++) {
+            int number = Integer.parseInt(String.valueOf(arr[i]));
+            if (Math.abs(number - temp) != 1) {
+                check = false;
+                break;
+            }
+            temp = number;
+        }
+        return check;
+    }
+
+    public static boolean happy(String num) {
+        String numNew = num;
+        boolean check = true;
+        while (true) {
+            long sum = 0;
+            char[] arr = numNew.toCharArray();
+            for (char n : arr) {
+                int number = Integer.parseInt(String.valueOf(n));
+                sum += Math.pow(number, 2);
+            }
+            if (sum == 1) {
+                break;
+            }
+            if (sum == Long.parseLong(num) || sum / 10 == Long.parseLong(num) || sum == 4) {
+                check = false;
+                break;
+            } else {
+                numNew = String.valueOf(sum);
+            }
+        }
+        return check;
+    }
+}
